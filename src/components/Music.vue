@@ -95,24 +95,65 @@ export default {
       currentTime: '0:00',
     };
   },
+  mounted() {
+    this.music.element = document.querySelector('.music-element');
+    this.music.element.addEventListener('ended', () => {
+      this.currentTime = '0:00';
+      this.music.element.currentTime = 0;
+    });
+
+    this.music.element.onloadeddata = () => {
+      this.seekbar.max = this.music.element.duration;
+      this.duration =
+        (parseInt(this.seekbar.max / 60) % 60) +
+        ':' +
+        parseInt(this.seekbar.max % 60);
+    };
+
+    this.music.element.ontimeupdate = () => {
+      this.seekbar.value = this.music.element.currentTime;
+    };
+
+    this.music.element.addEventListener(
+      'timeupdate',
+      () => {
+        let cs = parseInt(this.music.element.currentTime % 60);
+        let cm = parseInt((this.music.element.currentTime / 60) % 60);
+
+        if (cs <= 9) {
+          cs = `0${cs}`;
+        }
+
+        this.currentTime = cm + ':' + cs;
+      },
+      false
+    );
+  },
   methods: {
     handlePlay() {
-      //
+      this.music.paused = !this.music.paused;
+      if (this.music.paused) {
+        this.music.element.pause();
+      } else {
+        this.music.element.play();
+      }
     },
     handleRepeat() {
-      //
+      this.music.loop = !this.music.loop;
     },
     handleVolume() {
-      //
+      this.volume.active = !this.volume.active;
     },
     handleVolumeDown() {
-      //
+      this.volume.range = Number(this.volume.range) - 20;
+      this.music.element.volume = Number(this.volume.range) / 100;
     },
     handleVolumeUp() {
-      //
+      this.volume.range = Number(this.volume.range) + 20;
+      this.music.element.volume = Number(this.volume.range) / 100;
     },
     handleFavourite() {
-      //
+      this.music.favourite = !this.music.favourite;
     },
   },
 };
